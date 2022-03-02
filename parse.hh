@@ -11,11 +11,13 @@ struct instruction_t {
 }; 
 
 constexpr int instructionSizes[] = {
-    1,
-    3,
-    1,
-    1,
+    1, 3, 1, 1, 1, 1, 2, 1,
 };
+
+#define FLAG_Z(x) (x & 0x80)
+#define FLAG_N(x) (x & 0x40)
+#define FLAG_H(x) (x & 0x20)
+#define FLAG_C(x) (x & 0x10)
 
 template <std::size_t N>
 constexpr auto numInstr(const char (&str)[N]) {
@@ -90,6 +92,21 @@ inline constexpr void execute(unsigned char* data_ptr, registers_t &reg)
         }
         else if constexpr (instr.op == op_t::inc_bc) {
             reg.bc++;
+        }
+        else if constexpr (instr.op == op_t::inc_b) {
+            reg.b++;
+            // TODO: set appropriate flags
+        }
+        else if constexpr (instr.op == op_t::dec_b) {
+            reg.b--;
+            // TODO: set appropriate flags
+        }
+        else if constexpr (instr.op == op_t::ld_b_d8) {
+            reg.b = instr.operands[0];
+        }
+        else if constexpr (instr.op == op_t::rlca) {
+            reg.a = reg.a << 1 | reg.a >> 7;
+            reg.f = (reg.a >> 7) << 4;
         }
         else {
             std::cout << "Unknown instruction: " << (int) instr.op << std::endl;
