@@ -41,4 +41,4 @@ struct registers_t {
 	
 	unsigned short sp;
 	unsigned short pc;
-} extern registers;
+};
