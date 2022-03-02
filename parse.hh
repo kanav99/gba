@@ -4,16 +4,17 @@
 #include "instructions.hh"
 #include "registers.hh"
 
-const int num_instructions = 2; // Goal: 512
 struct instruction_t {
     op_t op;
     int size;
     char operands[2];
 }; 
 
-constexpr int instructionSizes[num_instructions] = {
+constexpr int instructionSizes[] = {
     1,
-    3
+    3,
+    1,
+    1,
 };
 
 template <std::size_t N>
@@ -83,6 +84,12 @@ inline constexpr void execute(unsigned char* data_ptr, registers_t &reg)
         }
         else if constexpr (instr.op == op_t::ld_bc_d16) {
             reg.bc = * (uint16_t *) (instr.operands);
+        }
+        else if constexpr (instr.op == op_t::ld_mbc_a) {
+            data_ptr[reg.bc] = reg.a;
+        }
+        else if constexpr (instr.op == op_t::inc_bc) {
+            reg.bc++;
         }
         else {
             std::cout << "Unknown instruction: " << (int) instr.op << std::endl;

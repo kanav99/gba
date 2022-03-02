@@ -2,7 +2,7 @@
 #include <iostream>
 
 const std::size_t N = 5;
-static constexpr char rom[N] = {0, 1, 5, 0, 0};
+static constexpr char rom[N] = {0, 1, 5, 0, 2};
 
 int main() {
     struct registers_t reg;
