@@ -1,3 +1,5 @@
+#pragma once
+
 enum class op_t {
     nop,
     ld_bc_d16,
@@ -9,3 +11,6 @@ enum class op_t {
     rlca,
 };
 
+constexpr int instructionSizes[] = {
+    1, 3, 1, 1, 1, 1, 2, 1,
+};

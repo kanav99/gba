@@ -1,3 +1,5 @@
+#pragma once
+
 struct registers_t {
 	struct {
 		union {
@@ -41,4 +43,8 @@ struct registers_t {
 	
 	unsigned short sp;
 	unsigned short pc;
+	bool flag_z;
+	bool flag_n;
+	bool flag_h;
+	bool flag_c;
 };
