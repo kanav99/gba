@@ -7,9 +7,9 @@ template <std::size_t N,  const program_t<N> program, std::size_t instr_ptr = 0>
 constexpr instruction_t get_instr()
 {
     if constexpr (program.code[instr_ptr] == 0xCB) {
-        return instruction_t{static_cast<op_t>(program.code[instr_ptr + 1] + 256), instructionSizes[program.code[instr_ptr + 1] + 256]};
+        return instruction_t{static_cast<op_t>(program.code[instr_ptr + 1] + 256), instruction_sizes[program.code[instr_ptr + 1] + 256]};
     } else {
-        return instruction_t{static_cast<op_t>(program.code[instr_ptr]), instructionSizes[program.code[instr_ptr]]};
+        return instruction_t{static_cast<op_t>(program.code[instr_ptr]), instruction_sizes[program.code[instr_ptr]]};
     }
 }
 
