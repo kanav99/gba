@@ -1,0 +1,4 @@
+capstone==4.0.2
+intervaltree==3.1.0
+pyelftools==0.28
+sortedcontainers==2.4.0
