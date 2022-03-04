@@ -2,6 +2,9 @@
 
 #include <cstdint>
 
+template<std::size_t N, class T>
+constexpr std::size_t countof(T(&)[N]) { return N; }
+
 #define KB 1024
 typedef unsigned char byte;
 typedef uint32_t u32;
