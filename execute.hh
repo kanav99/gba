@@ -13,10 +13,11 @@ constexpr instruction_t get_instr()
     }
 }
 
-template <std::size_t N,  const program_t<N> program, address instr_ptr = 0>
+template <std::size_t N,  const program_t<N> program, address instr_ptr = 0, std::size_t end_ptr = N>
 inline constexpr void execute(mmap_t* mmap, registers_t &reg)
 {
-    if constexpr (instr_ptr < N)
+    // std::cout << end_ptr << std::endl;
+    if constexpr (instr_ptr < end_ptr)
     {
         constexpr auto instr = get_instr<N, program, instr_ptr>();
         if constexpr (instr.op == op_t::nop) {
@@ -82,7 +83,19 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
         }
         else if constexpr (instr.op == op_t::jp_nz_s8) {
             constexpr address addr = instr_ptr + instr.size + static_cast<s16>(static_cast<s8>(program.code[instr_ptr + 1]));
-            if (!reg.flag_z) {
+            // risky code
+            if constexpr (addr < instr_ptr) {
+                // loop
+                while(!reg.flag_z) {
+                    execute<N, program, addr, instr_ptr>(mmap, reg);
+                }
+                return execute<N, program, instr_ptr + instr.size, end_ptr>(mmap, reg);
+            }
+            else {
+                // ifelse
+                if (reg.flag_z) {
+                    execute<N, program, instr_ptr + instr.size, addr>(mmap, reg);
+                }
                 return execute<N, program, addr>(mmap, reg);
             }
         }
@@ -120,9 +133,9 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
             reg.flag_h = 1;
         }
         else {
-            std::cout << "Unknown instruction 0x" << std::hex << (u16)instr.op << " at address 0x" << instr_ptr  << std::endl;
+            // std::cout << "Unknown instruction 0x" << std::hex << (u16)instr.op << " at address 0x" << instr_ptr  << std::endl;
             return;
         }
-        return execute<N, program, instr_ptr + instr.size>(mmap, reg);
+        return execute<N, program, instr_ptr + instr.size, end_ptr>(mmap, reg);
     }
 }
