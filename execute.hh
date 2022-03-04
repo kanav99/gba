@@ -74,11 +74,29 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
             reg.flag_c = (reg.a & 1);
             reg.a = reg.a >> 1 | reg.a << 7;
         }
+        else if constexpr (instr.op == op_t::ld_hl_d16) {
+            reg.hl = *(u16 *)(program.code + instr_ptr + 1);
+        }
         else if constexpr (instr.op == op_t::ld_sp_d16) {
             reg.sp = *(u16 *)(program.code + instr_ptr + 1);
         }
+        else if constexpr (instr.op == op_t::ld_mhldec_a) {
+            mmap->setByte(reg.hl--, reg.a);
+        }
+        else if constexpr (instr.op == op_t::xor_a) {
+            reg.a = 0;
+            reg.flag_c = 0;
+            reg.flag_h = 0;
+            reg.flag_n = 0;
+            reg.flag_z = 1;
+        }
+        else if constexpr (instr.op == op_t::bit_7_h) {
+            reg.flag_z = !(reg.h & 0x80);
+            reg.flag_n = 1;
+            reg.flag_h = 1;
+        }
         else {
-            throw std::logic_error(std::string("Unknown instruction ") + std::to_string((u8)instr.op));
+            throw std::logic_error(std::string("Unknown instruction ") + std::to_string((u16)instr.op));
         }
         execute<N, program, instr_ptr + instr.size>(mmap, reg);
     }
