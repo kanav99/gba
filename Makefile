@@ -4,7 +4,7 @@ CXXFLAGS = -O3 -std=c++2a
 
 all: game
 
-main.o: main.cc
+main.o: main.cc instructions.hh execute.hh
 	$(CXX) $(CXXFLAGS) -c main.cc -o main.o
 
 game: main.o

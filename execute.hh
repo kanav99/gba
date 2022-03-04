@@ -74,8 +74,11 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
             reg.flag_c = (reg.a & 1);
             reg.a = reg.a >> 1 | reg.a << 7;
         }
+        else if constexpr (instr.op == op_t::ld_sp_d16) {
+            reg.sp = *(u16 *)(program.code + instr_ptr + 1);
+        }
         else {
-            throw std::logic_error(std::string("Unknown instruction ") + std::to_string((int)instr.op));
+            throw std::logic_error(std::string("Unknown instruction ") + std::to_string((u8)instr.op));
         }
         execute<N, program, instr_ptr + instr.size>(mmap, reg);
     }
