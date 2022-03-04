@@ -44,10 +44,35 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
         }
         else if constexpr (instr.op == op_t::rlca) {
             reg.a = reg.a << 1 | reg.a >> 7;
-            reg.flag_c = (reg.a >> 7);
+            reg.flag_c = (reg.a & 1);
         }
         else if constexpr (instr.op == op_t::ld_ma16_sp) {
             mmap->setWord(*(u16 *)(program.code + instr_ptr + 1), reg.sp);
+        }
+        else if constexpr (instr.op == op_t::add_hl_bc) {
+            reg.hl += reg.bc;
+            // TODO: set appropriate flags
+        }
+        else if constexpr (instr.op == op_t::ld_a_mbc) {
+            reg.a = mmap->getByte(reg.bc);
+        }
+        else if constexpr (instr.op == op_t::dec_bc) {
+            reg.bc--;
+        }
+        else if constexpr (instr.op == op_t::inc_c) {
+            reg.c++;
+            // TODO: set appropriate flags
+        }
+        else if constexpr (instr.op == op_t::dec_c) {
+            reg.c--;
+            // TODO: set appropriate flags
+        }
+        else if constexpr (instr.op == op_t::ld_c_d8) {
+            reg.c = program.code[instr_ptr + 1];
+        }
+        else if constexpr (instr.op == op_t::rrca) {
+            reg.flag_c = (reg.a & 1);
+            reg.a = reg.a >> 1 | reg.a << 7;
         }
         else {
             std::cout << "Unknown instruction: " << (int) instr << std::endl;
