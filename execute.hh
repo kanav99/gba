@@ -75,7 +75,7 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
             reg.a = reg.a >> 1 | reg.a << 7;
         }
         else {
-            std::cout << "Unknown instruction: " << (int) instr << std::endl;
+            throw std::logic_error(std::string("Unknown instruction ") + std::to_string((int)instr.op));
         }
         execute<N, program, instr_ptr + instr.size>(mmap, reg);
     }

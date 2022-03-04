@@ -19,12 +19,12 @@ enum class op_t {
     rrca,
 };
 
-constexpr std::size_t instruction_sizes[] = {
+constexpr std::size_t instruction_sizes[512] = {
     1, 3, 1, 1, 1, 1, 2, 1,
     3, 1, 1, 1, 1, 1, 2, 1,
 };
 
-constexpr int instruction_cycles[] = {
+constexpr int instruction_cycles[512] = {
    1, 3, 2, 2, 1, 1, 2, 1,
    5, 2, 2, 2, 1, 1, 2, 1,
 };

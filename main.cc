@@ -2,7 +2,10 @@
 #include "execute.hh"
 #include "mmap.hh"
 
-static constexpr char rom[] = {8, 0, 0};
+static constexpr u8 rom[] = {
+#include "roms/dmg_rom.txt"
+};
+
 const std::size_t N = countof(rom);
 
 // dont want no shit inside main disassembly
