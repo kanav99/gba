@@ -15,6 +15,7 @@ public:
 
   void setByte(address addr, u8 value) {
     ram[addr] = value;
+    // std::cout << "set ram[" << addr << "] = " << (int)value << std::endl;
   }
 
   u16 getWord(address addr) {

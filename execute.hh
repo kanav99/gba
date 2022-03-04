@@ -3,7 +3,7 @@
 #include "instructions.hh"
 #include "mmap.hh"
 
-template <std::size_t N,  const program_t<N> program, std::size_t instr_ptr = 0>
+template <std::size_t N,  const program_t<N> program, address instr_ptr = 0>
 constexpr instruction_t get_instr()
 {
     if constexpr (program.code[instr_ptr] == 0xCB) {
@@ -13,7 +13,7 @@ constexpr instruction_t get_instr()
     }
 }
 
-template <std::size_t N,  const program_t<N> program, std::size_t instr_ptr = 0>
+template <std::size_t N,  const program_t<N> program, address instr_ptr = 0>
 inline constexpr void execute(mmap_t* mmap, registers_t &reg)
 {
     if constexpr (instr_ptr < N)
@@ -74,6 +74,18 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
             reg.flag_c = (reg.a & 1);
             reg.a = reg.a >> 1 | reg.a << 7;
         }
+        else if constexpr (instr.op == op_t::ld_de_d16) {
+            reg.de = *(u16 *) (program.code + instr_ptr + 1);
+        }
+        else if constexpr (instr.op == op_t::ld_a_mde) {
+            reg.a = mmap->getByte(reg.de);
+        }
+        else if constexpr (instr.op == op_t::jp_nz_s8) {
+            constexpr address addr = instr_ptr + instr.size + static_cast<s16>(static_cast<s8>(program.code[instr_ptr + 1]));
+            if (!reg.flag_z) {
+                return execute<N, program, addr>(mmap, reg);
+            }
+        }
         else if constexpr (instr.op == op_t::ld_hl_d16) {
             reg.hl = *(u16 *)(program.code + instr_ptr + 1);
         }
@@ -83,6 +95,12 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
         else if constexpr (instr.op == op_t::ld_mhldec_a) {
             mmap->setByte(reg.hl--, reg.a);
         }
+        else if constexpr (instr.op == op_t::ld_a_d8) {
+            reg.a = program.code[instr_ptr + 1];
+        }
+        else if constexpr (instr.op == op_t::ld_mhl_a) {
+            mmap->setByte(reg.hl, reg.a);
+        }
         else if constexpr (instr.op == op_t::xor_a) {
             reg.a = 0;
             reg.flag_c = 0;
@@ -90,14 +108,21 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
             reg.flag_n = 0;
             reg.flag_z = 1;
         }
+        else if constexpr (instr.op == op_t::ld_mc_a) {
+            mmap->setByte(static_cast<address>(0xff00) | static_cast<address>(reg.c), reg.a);
+        }
+        else if constexpr (instr.op == op_t::ld_ma8_a) {
+            mmap->setByte(static_cast<address>(0xff00) | static_cast<address>(program.code[instr_ptr + 1]), reg.a);
+        }
         else if constexpr (instr.op == op_t::bit_7_h) {
             reg.flag_z = !(reg.h & 0x80);
             reg.flag_n = 1;
             reg.flag_h = 1;
         }
         else {
-            throw std::logic_error(std::string("Unknown instruction ") + std::to_string((u16)instr.op));
+            std::cout << "Unknown instruction 0x" << std::hex << (u16)instr.op << " at address 0x" << instr_ptr  << std::endl;
+            return;
         }
-        execute<N, program, instr_ptr + instr.size>(mmap, reg);
+        return execute<N, program, instr_ptr + instr.size>(mmap, reg);
     }
 }

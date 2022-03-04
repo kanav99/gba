@@ -454,4 +454,5 @@ class MiniFile:
             return stream.read(size)
 
 if __name__ == '__main__':
-    print(disassemble("game.elf", "c++", ["main"])["main"]["asm"])
+    fname = "main"
+    print(disassemble("game.elf", "c++", [fname])[fname]["asm"])

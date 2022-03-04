@@ -4,13 +4,13 @@ CXXFLAGS = -O3 -std=c++2a
 
 all: game
 
-main.o: main.cc instructions.hh execute.hh
+main.o: main.cc instructions.hh execute.hh mmap.hh
 	$(CXX) $(CXXFLAGS) -c main.cc -o main.o
 
 game: main.o
 	$(CXX) -o game $(CXXFLAGS) main.o
 
-game.elf: main.cc
+game.elf: main.cc instructions.hh execute.hh mmap.hh
 	$(CXX) -o game.elf $(CXXFLAGS) main.cc
 
 docker: main.cc
