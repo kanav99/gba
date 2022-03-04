@@ -14,14 +14,16 @@ game.elf: main.cc
 	$(CXX) -o game.elf $(CXXFLAGS) main.cc
 
 docker: main.cc
-	docker run -w /app -v "$(shell pwd):/app" -it kanav99/gba make game.elf
+	@docker run --rm -w /app -v "$(shell pwd):/app" -it kanav99/gba make game.elf
 
 clean:
 	rm -f *.o game *.elf
 
 venv:
-	python3 -m venv venv
+	@python3 -m venv venv
+	@VIRTUAL_ENV=./venv venv/bin/pip install -U pip
+	@VIRTUAL_ENV=./venv venv/bin/pip install -r requirements.txt
 
 disas: docker venv
-	python3 minidis.py
+	@VIRTUAL_ENV=./venv venv/bin/python minidis.py
 
