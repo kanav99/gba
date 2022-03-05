@@ -14,6 +14,20 @@ constexpr instruction_t get_instr()
 }
 
 template <std::size_t N,  address instr_ptr = 0, std::size_t end_ptr = N>
+__attribute__((always_inline)) inline constexpr void execute();
+
+template <std::size_t N, address func_ptr = 0>
+__attribute__((noinline)) constexpr void func_call()
+{
+    try {
+        execute<N, func_ptr>();
+    }
+    catch (int x) {
+        return;
+    }
+}
+
+template <std::size_t N,  address instr_ptr, std::size_t end_ptr>
 __attribute__((always_inline)) inline constexpr void execute()
 {
     // std::cout << end_ptr << std::endl;
@@ -111,6 +125,9 @@ __attribute__((always_inline)) inline constexpr void execute()
         else if constexpr (instr.op == op_t::ld_a_d8) {
             reg.a = program.code[instr_ptr + 1];
         }
+        else if constexpr (instr.op == op_t::hlt) {
+            std::exit(0);
+        }
         else if constexpr (instr.op == op_t::ld_mhl_a) {
             mmap.setByte(reg.hl, reg.a);
         }
@@ -120,6 +137,13 @@ __attribute__((always_inline)) inline constexpr void execute()
             reg.flag_h = 0;
             reg.flag_n = 0;
             reg.flag_z = 1;
+        }
+        else if constexpr (instr.op == op_t::ret) {
+            throw 69;
+        }
+        else if constexpr (instr.op == op_t::call_a16) {
+            constexpr address addr = program.code[instr_ptr + 1] | program.code[instr_ptr + 2] << 8;
+            func_call<N, addr>();
         }
         else if constexpr (instr.op == op_t::ld_mc_a) {
             mmap.setByte(static_cast<address>(0xff00) | static_cast<address>(reg.c), reg.a);
@@ -131,6 +155,9 @@ __attribute__((always_inline)) inline constexpr void execute()
             reg.flag_z = !(reg.h & 0x80);
             reg.flag_n = 1;
             reg.flag_h = 1;
+        }
+        else if constexpr (instr.op == op_t::print_hi) {
+            std::cout << "hi" << std::endl;
         }
         else {
             // std::cout << "Unknown instruction 0x" << std::hex << (u16)instr.op << " at address 0x" << instr_ptr  << std::endl;

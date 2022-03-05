@@ -1,0 +1,6 @@
+// _start:
+0xcd, 0x04, 0x00, // call func_4
+0x76,             // hlt
+// func_4:
+0xfd,             // print("hi")
+0xc9              // ret
