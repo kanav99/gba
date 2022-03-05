@@ -1,50 +1,44 @@
 #pragma once
 
-struct registers_t {
-	struct {
-		union {
-			struct {
-				unsigned char f;
-				unsigned char a;
-			};
-			unsigned short af;
+register struct {
+	union {
+		struct {
+			u8 f;
+			u8 a;
 		};
+		u16 af;
 	};
-	
-	struct {
-		union {
-			struct {
-				unsigned char c;
-				unsigned char b;
-			};
-			unsigned short bc;
+
+	union {
+		struct {
+			u8 c;
+			u8 b;
 		};
+		u16 bc;
 	};
-	
-	struct {
-		union {
-			struct {
-				unsigned char e;
-				unsigned char d;
-			};
-			unsigned short de;
+
+	union {
+		struct {
+			u8 e;
+			u8 d;
 		};
+		u16 de;
 	};
-	
-	struct {
-		union {
-			struct {
-				unsigned char l;
-				unsigned char h;
-			};
-			unsigned short hl;
+
+	union {
+		struct {
+			u8 l;
+			u8 h;
 		};
+		u16 hl;
 	};
-	
-	unsigned short sp;
-	unsigned short pc;
-	bool flag_z;
-	bool flag_n;
-	bool flag_h;
-	bool flag_c;
-};
+} reg asm("r12");
+
+struct {
+	bool z;
+	bool n;
+	bool h;
+	bool c;
+} flags;
+
+u16 sp;

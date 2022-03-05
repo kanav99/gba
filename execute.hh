@@ -59,10 +59,10 @@ __attribute__((always_inline)) inline constexpr void execute()
         }
         else if constexpr (instr.op == op_t::rlca) {
             reg.a = reg.a << 1 | reg.a >> 7;
-            reg.flag_c = (reg.a & 1);
+            flags.c = (reg.a & 1);
         }
         else if constexpr (instr.op == op_t::ld_ma16_sp) {
-            mmap.setWord(*(u16 *)(program.code + instr_ptr + 1), reg.sp);
+            mmap.setWord(*(u16 *)(program.code + instr_ptr + 1), sp);
         }
         else if constexpr (instr.op == op_t::add_hl_bc) {
             reg.hl += reg.bc;
@@ -86,7 +86,7 @@ __attribute__((always_inline)) inline constexpr void execute()
             reg.c = program.code[instr_ptr + 1];
         }
         else if constexpr (instr.op == op_t::rrca) {
-            reg.flag_c = (reg.a & 1);
+            flags.c = (reg.a & 1);
             reg.a = reg.a >> 1 | reg.a << 7;
         }
         else if constexpr (instr.op == op_t::ld_de_d16) {
@@ -100,14 +100,14 @@ __attribute__((always_inline)) inline constexpr void execute()
             // risky code
             if constexpr (addr < instr_ptr) {
                 // loop
-                while(!reg.flag_z) {
+                while(!flags.z) {
                     execute<N, addr, instr_ptr>();
                 }
                 return execute<N, instr_ptr + instr.size, end_ptr>();
             }
             else {
                 // ifelse
-                if (reg.flag_z) {
+                if (flags.z) {
                     execute<N, instr_ptr + instr.size, addr>();
                 }
                 return execute<N, addr>();
@@ -117,7 +117,7 @@ __attribute__((always_inline)) inline constexpr void execute()
             reg.hl = *(u16 *)(program.code + instr_ptr + 1);
         }
         else if constexpr (instr.op == op_t::ld_sp_d16) {
-            reg.sp = *(u16 *)(program.code + instr_ptr + 1);
+            sp = *(u16 *)(program.code + instr_ptr + 1);
         }
         else if constexpr (instr.op == op_t::ld_mhldec_a) {
             mmap.setByte(reg.hl--, reg.a);
@@ -133,10 +133,10 @@ __attribute__((always_inline)) inline constexpr void execute()
         }
         else if constexpr (instr.op == op_t::xor_a) {
             reg.a = 0;
-            reg.flag_c = 0;
-            reg.flag_h = 0;
-            reg.flag_n = 0;
-            reg.flag_z = 1;
+            flags.c = 0;
+            flags.h = 0;
+            flags.n = 0;
+            flags.z = 1;
         }
         else if constexpr (instr.op == op_t::ret) {
             throw 69;
@@ -152,9 +152,9 @@ __attribute__((always_inline)) inline constexpr void execute()
             mmap.setByte(static_cast<address>(0xff00) | static_cast<address>(program.code[instr_ptr + 1]), reg.a);
         }
         else if constexpr (instr.op == op_t::bit_7_h) {
-            reg.flag_z = !(reg.h & 0x80);
-            reg.flag_n = 1;
-            reg.flag_h = 1;
+            flags.z = !(reg.h & 0x80);
+            flags.n = 1;
+            flags.h = 1;
         }
         else if constexpr (instr.op == op_t::print_hi) {
             std::cout << "hi" << std::endl;

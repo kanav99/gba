@@ -1,4 +1,5 @@
 CXXFLAGS = -O3 -std=c++2a
+# CXX = g++-10
 
 .PHONY: all clean elf docker
 

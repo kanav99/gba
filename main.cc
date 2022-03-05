@@ -10,7 +10,6 @@ const std::size_t N = countof(rom);
 constexpr auto program = parse<N>(rom);
 
 mmap_t mmap;
-registers_t reg;
 
 #include "execute.hh"
 
