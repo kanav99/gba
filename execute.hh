@@ -3,7 +3,7 @@
 #include "instructions.hh"
 #include "mmap.hh"
 
-template <std::size_t N,  const program_t<N> program, address instr_ptr = 0>
+template <std::size_t N, address instr_ptr = 0>
 constexpr instruction_t get_instr()
 {
     if constexpr (program.code[instr_ptr] == 0xCB) {
@@ -13,13 +13,13 @@ constexpr instruction_t get_instr()
     }
 }
 
-template <std::size_t N,  const program_t<N> program, address instr_ptr = 0, std::size_t end_ptr = N>
-inline constexpr void execute(mmap_t* mmap, registers_t &reg)
+template <std::size_t N,  address instr_ptr = 0, std::size_t end_ptr = N>
+__attribute__((always_inline)) inline constexpr void execute()
 {
     // std::cout << end_ptr << std::endl;
     if constexpr (instr_ptr < end_ptr)
     {
-        constexpr auto instr = get_instr<N, program, instr_ptr>();
+        constexpr auto instr = get_instr<N, instr_ptr>();
         if constexpr (instr.op == op_t::nop) {
             // pass
         }
@@ -27,7 +27,7 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
             reg.bc = *(u16 *) (program.code + instr_ptr + 1);
         }
         else if constexpr (instr.op == op_t::ld_mbc_a) {
-            mmap->setByte(reg.bc, reg.a);
+            mmap.setByte(reg.bc, reg.a);
         }
         else if constexpr (instr.op == op_t::inc_bc) {
             reg.bc++;
@@ -48,14 +48,14 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
             reg.flag_c = (reg.a & 1);
         }
         else if constexpr (instr.op == op_t::ld_ma16_sp) {
-            mmap->setWord(*(u16 *)(program.code + instr_ptr + 1), reg.sp);
+            mmap.setWord(*(u16 *)(program.code + instr_ptr + 1), reg.sp);
         }
         else if constexpr (instr.op == op_t::add_hl_bc) {
             reg.hl += reg.bc;
             // TODO: set appropriate flags
         }
         else if constexpr (instr.op == op_t::ld_a_mbc) {
-            reg.a = mmap->getByte(reg.bc);
+            reg.a = mmap.getByte(reg.bc);
         }
         else if constexpr (instr.op == op_t::dec_bc) {
             reg.bc--;
@@ -79,7 +79,7 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
             reg.de = *(u16 *) (program.code + instr_ptr + 1);
         }
         else if constexpr (instr.op == op_t::ld_a_mde) {
-            reg.a = mmap->getByte(reg.de);
+            reg.a = mmap.getByte(reg.de);
         }
         else if constexpr (instr.op == op_t::jp_nz_s8) {
             constexpr address addr = instr_ptr + instr.size + static_cast<s16>(static_cast<s8>(program.code[instr_ptr + 1]));
@@ -87,16 +87,16 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
             if constexpr (addr < instr_ptr) {
                 // loop
                 while(!reg.flag_z) {
-                    execute<N, program, addr, instr_ptr>(mmap, reg);
+                    execute<N, addr, instr_ptr>();
                 }
-                return execute<N, program, instr_ptr + instr.size, end_ptr>(mmap, reg);
+                return execute<N, instr_ptr + instr.size, end_ptr>();
             }
             else {
                 // ifelse
                 if (reg.flag_z) {
-                    execute<N, program, instr_ptr + instr.size, addr>(mmap, reg);
+                    execute<N, instr_ptr + instr.size, addr>();
                 }
-                return execute<N, program, addr>(mmap, reg);
+                return execute<N, addr>();
             }
         }
         else if constexpr (instr.op == op_t::ld_hl_d16) {
@@ -106,13 +106,13 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
             reg.sp = *(u16 *)(program.code + instr_ptr + 1);
         }
         else if constexpr (instr.op == op_t::ld_mhldec_a) {
-            mmap->setByte(reg.hl--, reg.a);
+            mmap.setByte(reg.hl--, reg.a);
         }
         else if constexpr (instr.op == op_t::ld_a_d8) {
             reg.a = program.code[instr_ptr + 1];
         }
         else if constexpr (instr.op == op_t::ld_mhl_a) {
-            mmap->setByte(reg.hl, reg.a);
+            mmap.setByte(reg.hl, reg.a);
         }
         else if constexpr (instr.op == op_t::xor_a) {
             reg.a = 0;
@@ -122,10 +122,10 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
             reg.flag_z = 1;
         }
         else if constexpr (instr.op == op_t::ld_mc_a) {
-            mmap->setByte(static_cast<address>(0xff00) | static_cast<address>(reg.c), reg.a);
+            mmap.setByte(static_cast<address>(0xff00) | static_cast<address>(reg.c), reg.a);
         }
         else if constexpr (instr.op == op_t::ld_ma8_a) {
-            mmap->setByte(static_cast<address>(0xff00) | static_cast<address>(program.code[instr_ptr + 1]), reg.a);
+            mmap.setByte(static_cast<address>(0xff00) | static_cast<address>(program.code[instr_ptr + 1]), reg.a);
         }
         else if constexpr (instr.op == op_t::bit_7_h) {
             reg.flag_z = !(reg.h & 0x80);
@@ -136,6 +136,6 @@ inline constexpr void execute(mmap_t* mmap, registers_t &reg)
             // std::cout << "Unknown instruction 0x" << std::hex << (u16)instr.op << " at address 0x" << instr_ptr  << std::endl;
             return;
         }
-        return execute<N, program, instr_ptr + instr.size, end_ptr>(mmap, reg);
+        return execute<N, instr_ptr + instr.size, end_ptr>();
     }
 }
