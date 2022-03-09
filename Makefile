@@ -27,3 +27,5 @@ venv:
 disas: docker venv
 	@VIRTUAL_ENV=./venv venv/bin/python minidis.py
 
+asm: docker venv
+	@VIRTUAL_ENV=./venv venv/bin/python asm.py
