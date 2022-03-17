@@ -37,3 +37,5 @@
 /venv/
 /roms/**
 !/roms/.gitkeep
+test.asm
+a.bin
